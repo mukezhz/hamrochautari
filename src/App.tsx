@@ -1,26 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import 'livekit-react/dist/index.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { PreJoinPage } from './PreJoinPage'
+import { RoomPage } from './RoomPage'
+import { Hello } from './Home';
+import { RoomCheck } from './RoomCheck';
+import { RoomStart } from './RoomStart';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <div className="container">
+      <Router>
+        <Routes>
+          <Route path="/" element={<Hello />} />
+          <Route path="/room" element={<RoomPage />} />
+          <Route path="/test" element={<PreJoinPage />} />
+          <Route path="/:roomname" element={<RoomCheck />} />
+          <Route path="/:roomname/start" element={<RoomStart />} />
+        </Routes>
+      </Router>
+    </div >
+  )
 }
 
-export default App;
+export default App
