@@ -1,25 +1,57 @@
+import "../App.css"
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { faBolt } from '@fortawesome/free-solid-svg-icons'
 import { createLocalVideoTrack, LocalVideoTrack } from 'livekit-client'
 import { AudioSelectButton, ControlButton, VideoRenderer, VideoSelectButton } from 'livekit-react'
 import { ReactElement, useEffect, useState } from "react"
 import { AspectRatio } from 'react-aspect-ratio'
-import { useNavigate } from 'react-router-dom'
+import { fetchToken } from "../utils";
+import { getUser } from "../utils/auth";
 
-export const PreJoinPage = () => {
+export const RoomCheck = () => {
+    const { roomname = '' } = useParams();
     // state to pass onto room
-    const [url, setUrl] = useState('')
+    const serverUrl = process.env.REACT_APP_URL || 'http://localhost:8000'
+    const wssUrl = process.env.REACT_APP_WSS || 'ws://localhost:7880'
+    const [url, setUrl] = useState(serverUrl)
+    // const url = 'http://localhost:8000'
+    const user = getUser()
+    const name = user?.displayName
+    // await fetchToken(url, roomname, name)
     const [token, setToken] = useState<string>('')
     const [simulcast, setSimulcast] = useState(true)
     const [dynacast, setDynacast] = useState(true)
     const [adaptiveStream, setAdaptiveStream] = useState(true)
     const [videoEnabled, setVideoEnabled] = useState(false)
-    const [audioEnabled, setAudioEnabled] = useState(true)
+    const [audioEnabled, setAudioEnabled] = useState(false)
     // disable connect button unless validated
     const [connectDisabled, setConnectDisabled] = useState(true)
     const [videoTrack, setVideoTrack] = useState<LocalVideoTrack>();
     const [audioDevice, setAudioDevice] = useState<MediaDeviceInfo>();
     const [videoDevice, setVideoDevice] = useState<MediaDeviceInfo>();
+    const [count, setCount] = useState(5)
     const navigate = useNavigate()
+
+    useEffect(() => {
+        if (!name || !roomname || !url) {
+            count > 0 && setTimeout(() => {
+                setCount(count - 1)
+            }, 1000)
+            if (count === 0) navigate({
+                pathname: '/'
+            })
+        }
+        (async () => {
+            try {
+                const response = await fetchToken(url, roomname, name)
+                const { access_token = '' } = response;
+                setToken(access_token)
+                setUrl(wssUrl)
+            } catch (e) {
+                console.log(e);
+            }
+        })()
+    }, [count])
 
     useEffect(() => {
         if (token && url) {
@@ -45,12 +77,18 @@ export const PreJoinPage = () => {
 
     useEffect(() => {
         // enable video by default
+        let video: LocalVideoTrack;
         createLocalVideoTrack({
             deviceId: videoDevice?.deviceId,
         }).then((track) => {
+            video = track;
+            // track?.stop()
             setVideoEnabled(true)
             setVideoTrack(track)
         })
+        return () => {
+            video?.stop()
+        }
     }, [videoDevice])
 
     const toggleAudio = () => {
@@ -110,8 +148,7 @@ export const PreJoinPage = () => {
                 localStorage.setItem(k, v);
             }
         navigate({
-            pathname: '/room',
-            search: "?" + new URLSearchParams(params).toString()
+            pathname: `/${roomname}/start`,
         })
     }
 
@@ -123,72 +160,51 @@ export const PreJoinPage = () => {
     }
 
     return (
-        <div className="prejoin">
-            <main>
-                <h2>Hamro Conference</h2>
-                <hr />
-                <div className="entrySection">
-                    <div>
-                        <div className="label">
-                            Conference URL
-                        </div>
-                        <div>
-                            <input type="text" name="url" value={url} onChange={e => setUrl(e.target.value)} />
-                        </div>
-                    </div>
-                    <div>
-                        <div className="label">
-                            Token
-                        </div>
-                        <div>
-                            <input type="text" name="token" value={token} onChange={e => setToken(e.target.value)} />
-                        </div>
-                    </div>
-                    <div className="options">
-                        <div>
-                            <input id="simulcast-option" type="checkbox" name="simulcast" checked={simulcast} onChange={e => setSimulcast(e.target.checked)} />
-                            <label htmlFor="simulcast-option">Simulcast</label>
-                        </div>
-                        <div>
-                            <input id="dynacast-option" type="checkbox" name="dynacast" checked={dynacast} onChange={e => setDynacast(e.target.checked)} />
-                            <label htmlFor="dynacast-option">Dynacast</label>
-                        </div>
-                        <div>
-                            <input id="adaptivestream-option" type="checkbox" name="adaptiveStream" checked={adaptiveStream} onChange={e => setAdaptiveStream(e.target.checked)} />
-                            <label htmlFor="adaptivestream-option">Adaptive Stream</label>
-                        </div>
-                    </div>
-                </div>
+        <>
+            {!name ? (<div className="App-header">
+                <h1>Unabe to fetch user info 🙁🙁🙁 </h1>
+                <p> Redirecting to home in: {count} seconds </p>
+            </div>
+            ) :
 
-                <div className="videoSection">
-                    <AspectRatio ratio={16 / 9}>
-                        {videoElement}
-                    </AspectRatio>
-                </div>
+                (<div className="prejoin">
+                    <main>
+                        <Link to="/">
+                            <h2>Hamro Conference</h2>
+                        </Link>
+                        <hr />
 
-                <div className="controlSection">
-                    <div>
-                        <AudioSelectButton
-                            isMuted={!audioEnabled}
-                            onClick={toggleAudio}
-                            onSourceSelected={setAudioDevice}
-                        />
-                        <VideoSelectButton
-                            isEnabled={videoTrack !== undefined}
-                            onClick={toggleVideo}
-                            onSourceSelected={selectVideoDevice}
-                        />
-                    </div>
-                    <div className="right">
-                        <ControlButton
-                            label="Connect"
-                            disabled={connectDisabled}
-                            //@ts-ignore
-                            icon={faBolt}
-                            onClick={connectToRoom} />
-                    </div>
-                </div>
-            </main>
-        </div>
+                        <div className="videoSection">
+                            <AspectRatio ratio={16 / 9}>
+                                {videoElement}
+                            </AspectRatio>
+                        </div>
+
+                        <div className="controlSection">
+                            <div>
+                                <AudioSelectButton
+                                    isMuted={!audioEnabled}
+                                    onClick={toggleAudio}
+                                    onSourceSelected={setAudioDevice}
+                                />
+                                <VideoSelectButton
+                                    isEnabled={videoTrack !== undefined}
+                                    onClick={toggleVideo}
+                                    onSourceSelected={selectVideoDevice}
+                                />
+                            </div>
+                            <div className="right">
+                                <ControlButton
+                                    label="Connect"
+                                    disabled={connectDisabled}
+                                    //@ts-ignore
+                                    icon={faBolt}
+                                    onClick={connectToRoom} />
+                            </div>
+                        </div>
+                    </main>
+                </div>)
+            }
+        </>
     )
 }

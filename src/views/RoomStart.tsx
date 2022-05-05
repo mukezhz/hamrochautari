@@ -2,24 +2,34 @@ import { faSquare, faThLarge, faUserFriends } from '@fortawesome/free-solid-svg-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Room, RoomEvent, VideoPresets } from 'livekit-client'
 import { DisplayContext, DisplayOptions, LiveKitRoom } from 'livekit-react'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import "react-aspect-ratio/aspect-ratio.css"
 import { useNavigate, useLocation } from 'react-router-dom'
-
-export const RoomPage = () => {
+export const RoomStart = () => {
     const [numParticipants, setNumParticipants] = useState(0)
+    const [load, setLoad] = useState(false)
     const [displayOptions, setDisplayOptions] = useState<DisplayOptions>({
         stageLayout: 'grid',
         showStats: false,
     })
     const navigate = useNavigate()
-    const query = new URLSearchParams(useLocation().search)
+    const location = useLocation()
     const url = localStorage.getItem("url");
     const token = localStorage.getItem("token");
     const recorder = localStorage.getItem("recorder");
-    // const url = query.get('url')
-    // const token = query.get('token')
-    // const recorder = query.get('recorder')
+    const onLeave = () => {
+        navigate({
+            pathname: '/',
+        })
+    }
+
+    useEffect(() => {
+        return () => {
+            if (!location.pathname.includes('start')) {
+                onLeave()
+            }
+        }
+    }, [load])
 
     if (!url || !token) {
         return (
@@ -29,17 +39,12 @@ export const RoomPage = () => {
         )
     }
 
-    const onLeave = () => {
-        navigate({
-            pathname: '/test',
-        })
-    }
-
     const updateParticipantSize = (room: Room) => {
         setNumParticipants(room.participants.size + 1);
     }
 
     const onParticipantDisconnected = (room: Room) => {
+        console.log("sijfasdi fjasdif ");
         updateParticipantSize(room)
 
         /* Special rule for recorder */
@@ -55,20 +60,19 @@ export const RoomPage = () => {
         });
     }
 
-    async function onConnected(room: Room, query: URLSearchParams) {
+    async function onConnected(room: Room) {
         // make it easier to debug
         (window as any).currentRoom = room;
-
-        if (isSet(query, 'audioEnabled')) {
-            const audioDeviceId = query.get('audioDeviceId');
+        if (isSet('audioEnabled')) {
+            const audioDeviceId = localStorage.getItem('audioDeviceId');
             if (audioDeviceId && room.options.audioCaptureDefaults) {
                 room.options.audioCaptureDefaults.deviceId = audioDeviceId;
             }
             await room.localParticipant.setMicrophoneEnabled(true);
         }
 
-        if (isSet(query, 'videoEnabled')) {
-            const videoDeviceId = query.get('videoDeviceId');
+        if (isSet('videoEnabled')) {
+            const videoDeviceId = localStorage.getItem('videoDeviceId');
             if (videoDeviceId && room.options.videoCaptureDefaults) {
                 room.options.videoCaptureDefaults.deviceId = videoDeviceId;
             }
@@ -76,8 +80,8 @@ export const RoomPage = () => {
         }
     }
 
-    function isSet(query: URLSearchParams, key: string): boolean {
-        return query.get(key) === '1' || query.get(key) === 'true';
+    function isSet(key: string): boolean {
+        return localStorage.getItem(key) === '1' || localStorage.getItem(key) === 'true';
     }
 
     return (
@@ -85,7 +89,9 @@ export const RoomPage = () => {
             <DisplayContext.Provider value={displayOptions}>
                 <div className="roomContainer">
                     <div className="topBar">
-                        <h2>Hamro Conference</h2>
+                        <a href="/">
+                            <h2>Hamro Conference</h2>
+                        </a>
                         <div className="right">
                             <div>
                                 <input id="showStats" type="checkbox" onChange={(e) => updateOptions({ showStats: e.target.checked })} />
@@ -121,14 +127,14 @@ export const RoomPage = () => {
                         url={url}
                         token={token}
                         onConnected={room => {
-                            onConnected(room, query);
+                            onConnected(room);
                             room.on(RoomEvent.ParticipantConnected, () => updateParticipantSize(room))
                             room.on(RoomEvent.ParticipantDisconnected, () => onParticipantDisconnected(room))
                             updateParticipantSize(room);
                         }}
                         connectOptions={{
-                            adaptiveStream: isSet(query, 'adaptiveStream'),
-                            dynacast: isSet(query, 'dynacast'),
+                            adaptiveStream: isSet('adaptiveStream'),
+                            dynacast: isSet('dynacast'),
                             videoCaptureDefaults: {
                                 resolution: VideoPresets.h720.resolution,
                             },
