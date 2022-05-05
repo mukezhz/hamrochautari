@@ -18,8 +18,15 @@ export const getUserWithGoogle = async () => {
     const result = await getRedirectResult(auth)
     if (result) {
         const token = await result.user.getIdToken();
-        const user = authenticate(token)
-        return user;
+        // const user = await authenticate(token)
+        // const { access_token } = await user
+        // const { user_profile } = await user
+        // localStorage.setItem('access_token', access_token || '')
+        // localStorage.setItem('user', window.btoa(JSON.stringify(user_profile)) || '')
+        // return await user_profile
+        localStorage.setItem('user', window.btoa(JSON.stringify(result.user)) || '')
+        localStorage.setItem('access_token', await result.user.getIdToken() || '')
+        return result.user;
     }
     return null
 }
@@ -29,6 +36,7 @@ export const logout = async () => {
     await signOut(auth)
     localStorage.removeItem('user')
     localStorage.removeItem("room")
+    localStorage.removeItem('access_token')
 }
 
 export const getUser = () => {
@@ -67,10 +75,5 @@ export const authenticate = async (token: string) => {
         }),
         method: 'POST'
     })
-    const user = await response.json()
-    const { access_token } = await user
-    const { user_profile } = await user
-    localStorage.setItem('access_token', access_token || '')
-    localStorage.setItem('user', window.btoa(JSON.stringify(user_profile)) || '')
-    return await user_profile
+    return await response.json()
 }
