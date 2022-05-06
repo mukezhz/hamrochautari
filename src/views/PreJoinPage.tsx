@@ -126,7 +126,7 @@ export const PreJoinPage = () => {
 
     const handleURLToken = () => {
         (async () => {
-            setUrl('ws://livekit.mukezhz.ml')
+            setUrl('wss://livekit.mukezhz.ml')
             const {access_token} = await fetchToken('https://conferencemukezhz.herokuapp.com', 'test', generateRoom())
             setToken(access_token)
         })()
