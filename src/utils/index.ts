@@ -1,3 +1,5 @@
+import { uniqueNamesGenerator, Config, adjectives, colors, animals, names } from 'unique-names-generator';
+
 export async function fetchToken(url: string, room: string, name: string) {
     const response = await fetch(`${url}/join`, {
         method: "POST",
@@ -37,3 +39,15 @@ export async function fetchToken(url: string, room: string, name: string) {
 //     const connectedRoom = await connectRoom(livekitRoom, url, access_token)
 //     return { createdRoom, ...connectedRoom }
 // }
+
+export const generateRoom = () => {
+    const customConfig: Config = {
+        dictionaries: [colors, animals, names, adjectives],
+        separator: '-',
+        length: 2,
+    };
+
+    const shortName: string = uniqueNamesGenerator(customConfig); // big-donkey
+    localStorage.setItem('room', shortName || '')
+    return shortName
+}

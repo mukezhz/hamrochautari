@@ -1,20 +1,8 @@
 import { useEffect, useState } from "react";
-import { uniqueNamesGenerator, Config, adjectives, colors, animals, names } from 'unique-names-generator';
 import { Link } from "react-router-dom";
 import { Button } from "../components/Button";
 import { getUser, logout } from "../utils/auth"
-
-const generateRoom = () => {
-    const customConfig: Config = {
-        dictionaries: [colors, animals, names, adjectives],
-        separator: '-',
-        length: 2,
-    };
-
-    const shortName: string = uniqueNamesGenerator(customConfig); // big-donkey
-    localStorage.setItem('room', shortName || '')
-    return shortName
-}
+import { generateRoom } from "../utils";
 
 export const Home = () => {
     const hosturl = process.env.REACT_APP_HOST_URL || "http://localhost:3000"

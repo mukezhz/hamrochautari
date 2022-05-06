@@ -14,8 +14,8 @@ const App = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/room" element={<PrivateRoute component={RoomPage} />} />
-          <Route path="/test" element={<PrivateRoute component={PreJoinPage} />} />
+          <Route path="/room" element={<RoomPage />} />
+          <Route path="/test" element={<PreJoinPage />} />
           <Route path="/:roomname" element={<PrivateRoute component={RoomCheck} />} />
           <Route path="/:roomname/start" element={<PrivateRoute component={RoomStart} />} />
           <Route path="/login" element={<Login />} />

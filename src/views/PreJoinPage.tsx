@@ -5,6 +5,7 @@ import { AudioSelectButton, ControlButton, VideoRenderer, VideoSelectButton } fr
 import { ReactElement, useEffect, useState } from "react"
 import { AspectRatio } from 'react-aspect-ratio'
 import { useNavigate, Link } from 'react-router-dom'
+import { fetchToken, generateRoom } from "../utils";
 
 export const PreJoinPage = () => {
     // state to pass onto room
@@ -123,13 +124,21 @@ export const PreJoinPage = () => {
         videoElement = <div className="placeholder" />
     }
 
+    const handleURLToken = () => {
+        (async () => {
+            setUrl('ws://livekit.mukezhz.ml')
+            const {access_token} = await fetchToken('https://conferencemukezhz.herokuapp.com', 'test', generateRoom())
+            setToken(access_token)
+        })()
+    }
+
     return (
         <div className="prejoin">
             <main>
                 <Link to="/">
                     <h2>Hamro Conference</h2>
                 </Link>
-                <hr />
+                <button onClick={handleURLToken}>Generate Url and Token</button>
                 <div className="entrySection">
                     <div>
                         <div className="label">
