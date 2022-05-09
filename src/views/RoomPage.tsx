@@ -1,11 +1,15 @@
+import 'react-simple-chat/src/components/index.css';
+import '../index.css'
+import Chat, { Message } from 'react-simple-chat';
 import { faSquare, faThLarge, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Room, RoomEvent, VideoPresets } from 'livekit-client'
+import { Room, RoomEvent, VideoPresets, DataPacket_Kind, RemoteParticipant } from 'livekit-client'
 import { DisplayContext, DisplayOptions, LiveKitRoom } from 'livekit-react'
 import { useState } from "react"
 import "react-aspect-ratio/aspect-ratio.css"
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 export const RoomPage = () => {
+    const [messages, setMessages] = useState<Message[]>([]);
     const [numParticipants, setNumParticipants] = useState(0)
     const [displayOptions, setDisplayOptions] = useState<DisplayOptions>({
         stageLayout: 'grid',
@@ -16,9 +20,18 @@ export const RoomPage = () => {
     const url = localStorage.getItem("url");
     const token = localStorage.getItem("token");
     const recorder = localStorage.getItem("recorder");
+    const [room, setRoom] = useState<Room>()
     // const url = query.get('url')
     // const token = query.get('token')
     // const recorder = query.get('recorder')
+    function handleSend(message: Message) {
+        messages.push(message)
+        setMessages([...messages]);
+        if (!room) return
+        const encode = new TextEncoder().encode(JSON.stringify(message))
+        room.localParticipant.publishData(encode, 0)
+    }
+
     if (!url || !token) {
         return (
             <div>
@@ -56,6 +69,7 @@ export const RoomPage = () => {
     async function onConnected(room: Room, query: URLSearchParams) {
         // make it easier to debug
         (window as any).currentRoom = room;
+        setRoom(room)
 
         if (isSet(query, 'audioEnabled')) {
             const audioDeviceId = query.get('audioDeviceId');
@@ -72,6 +86,12 @@ export const RoomPage = () => {
             }
             await room.localParticipant.setCameraEnabled(true);
         }
+    }
+    const onDataReceived = async (payload: Uint8Array, participant: RemoteParticipant | undefined, kind: DataPacket_Kind = 0) => {
+        const string = new TextDecoder().decode(payload);
+        const message: Message = JSON.parse(string)
+        messages.push(message)
+        setMessages([...messages])
     }
 
     function isSet(query: URLSearchParams, key: string): boolean {
@@ -117,25 +137,41 @@ export const RoomPage = () => {
                             </div>
                         </div>
                     </div>
-                    <LiveKitRoom
-                        url={url}
-                        token={token}
-                        onConnected={room => {
-                            onConnected(room, query);
-                            room.on(RoomEvent.ParticipantConnected, () => updateParticipantSize(room))
-                            room.on(RoomEvent.ParticipantDisconnected, () => onParticipantDisconnected(room))
-                            updateParticipantSize(room);
-                        }}
-                        connectOptions={{
-                            adaptiveStream: isSet(query, 'adaptiveStream'),
-                            dynacast: isSet(query, 'dynacast'),
-                            videoCaptureDefaults: {
-                                resolution: VideoPresets.h720.resolution,
-                            },
-                            logLevel: 'error',
-                        }}
-                        onLeave={onLeave}
-                    />
+                    <div style={displayOptions.stageLayout === 'grid' ? { width: "90%", margin: "0 auto", height: "90vh" } : { height: "90vh" }}>
+                        <LiveKitRoom
+                            url={url}
+                            token={token}
+                            onConnected={room => {
+                                room.on(RoomEvent.ParticipantConnected, () => updateParticipantSize(room))
+                                room.on(RoomEvent.ParticipantDisconnected, () => onParticipantDisconnected(room))
+                                room.on(RoomEvent.DataReceived, async (payload: Uint8Array, participant?: RemoteParticipant | undefined, kind?: DataPacket_Kind | undefined) => await onDataReceived(payload, participant, kind))
+                                onConnected(room, query);
+                                updateParticipantSize(room);
+                            }}
+                            connectOptions={{
+                                adaptiveStream: isSet(query, 'adaptiveStream'),
+                                dynacast: isSet(query, 'dynacast'),
+                                videoCaptureDefaults: {
+                                    resolution: VideoPresets.h720.resolution,
+                                },
+                                logLevel: 'error',
+                            }}
+                            onLeave={onLeave}
+                        />
+                    </div>
+                    {
+                        room ?
+                            <Chat
+                                containerStyle={{ bottom: 0, maxheight: "100vh" }}
+                                minimized={true}
+                                titleColor='black'
+                                title={room.localParticipant.identity}
+                                user={{ id: room.localParticipant.sid }}
+                                messages={messages}
+                                onSend={message => handleSend(message)}
+                            />
+                            : ''
+                    }
                 </div>
             </DisplayContext.Provider>
         </>

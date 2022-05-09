@@ -34,7 +34,7 @@ a:visited {
 .container {
   box-sizing: border-box;
   height: 100vh;
-  padding: 32px;
+  /* padding: 32px; */
 }
 
 .prejoin {
@@ -143,7 +143,9 @@ a:visited {
 }
 
 .roomContainer {
-  height: calc(100vh - 100px);
+  height: calc(80vh - 200px);
+  width: 70%;
+  margin: 0 auto;
 }
 
 .topBar {
@@ -306,5 +308,20 @@ a:visited {
 @-webkit-keyframes spin {
   to {
     -webkit-transform: rotate(360deg);
+  }
+}
+
+.chat-box-container {
+  height: 70vh;
+  width: 40%;
+}
+
+@media (max-width: 700px) {
+  .chat-container {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
   }
 }
