@@ -311,11 +311,6 @@ a:visited {
   }
 }
 
-.chat-box-container {
-  height: 70vh;
-  width: 40%;
-}
-
 @media (max-width: 700px) {
   .chat-container {
     position: fixed;
