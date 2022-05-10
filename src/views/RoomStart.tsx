@@ -6,12 +6,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Room, RoomEvent, VideoPresets, DataPacket_Kind, RemoteParticipant } from 'livekit-client'
 import { DisplayContext, DisplayOptions, LiveKitRoom } from 'livekit-react'
 import { useEffect, useState } from "react"
+import { useDispatch } from "react-redux";
+import { addMessage } from "../store/messages";
+import { useAppSelector } from "../hooks";
 import "react-aspect-ratio/aspect-ratio.css"
 import { useNavigate, useLocation } from 'react-router-dom'
 export const RoomStart = () => {
+    const dispatch = useDispatch()
+    const messages = useAppSelector(state => state.messages.messages)
     const [numParticipants, setNumParticipants] = useState(0)
-    const [load, setLoad] = useState(false)
-    const [messages, setMessages] = useState<Message[]>([]);
     const [room, setRoom] = useState<Room>()
     const [displayOptions, setDisplayOptions] = useState<DisplayOptions>({
         stageLayout: 'grid',
@@ -34,7 +37,7 @@ export const RoomStart = () => {
                 onLeave()
             }
         }
-    }, [load])
+    }, [])
 
     if (!url || !token) {
         return (
@@ -49,7 +52,6 @@ export const RoomStart = () => {
     }
 
     const onParticipantDisconnected = (room: Room) => {
-        console.log("sijfasdi fjasdif ");
         updateParticipantSize(room)
 
         /* Special rule for recorder */
@@ -91,8 +93,9 @@ export const RoomStart = () => {
     }
 
     function handleSend(message: Message) {
-        messages.push(message)
-        setMessages([...messages]);
+        dispatch(
+            addMessage({ ...message })
+        )
         if (!room) return
         const encode = new TextEncoder().encode(JSON.stringify(message))
         room.localParticipant.publishData(encode, 0)
@@ -101,8 +104,9 @@ export const RoomStart = () => {
     const onDataReceived = async (payload: Uint8Array, participant: RemoteParticipant | undefined, kind: DataPacket_Kind = 0) => {
         const string = new TextDecoder().decode(payload);
         const message: Message = JSON.parse(string)
-        messages.push(message)
-        setMessages([...messages])
+        dispatch(
+            addMessage({ ...message })
+        )
     }
     return (
         <>
@@ -172,7 +176,7 @@ export const RoomStart = () => {
                                 minimized={true}
                                 titleColor='black'
                                 title={room.localParticipant.identity}
-                                user={{ id: room.localParticipant.sid }}
+                                user={{ id: room.localParticipant.sid, name: room.localParticipant.identity }}
                                 messages={messages}
                                 onSend={message => handleSend(message)}
                             />
