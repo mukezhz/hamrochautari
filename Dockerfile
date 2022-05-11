@@ -27,4 +27,4 @@ RUN npm install -g runtime-env-cra@0.2.4
 
 EXPOSE 80
 
-CMD ["/bin/sh", "-c", "runtime-env-cra --config-name=./public/runtime-env.js && nginx -g \"daemon off;\""]
+CMD ["/bin/sh", "-c", "runtime-env-cra && nginx -g \"daemon off;\""]
