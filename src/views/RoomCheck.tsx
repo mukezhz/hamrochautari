@@ -7,8 +7,10 @@ import { ReactElement, useEffect, useState } from "react"
 import { AspectRatio } from 'react-aspect-ratio'
 import { fetchToken } from "../utils";
 import { getUser } from "../utils/auth";
-
-export const RoomCheck = () => {
+interface RoomCheckProp {
+    check: Function;
+}
+export const RoomCheck = (props: RoomCheckProp) => {
     const { roomname = '' } = useParams();
     // state to pass onto room
     const serverUrl = window.__RUNTIME_CONFIG__.REACT_APP_URL || 'http://localhost:8000'
@@ -19,9 +21,9 @@ export const RoomCheck = () => {
     const name = user?.displayName
     // await fetchToken(url, roomname, name)
     const [token, setToken] = useState<string>('')
-    const [simulcast, setSimulcast] = useState(true)
-    const [dynacast, setDynacast] = useState(true)
-    const [adaptiveStream, setAdaptiveStream] = useState(true)
+    const simulcast = true
+    const dynacast = useState(true)
+    const adaptiveStream = true
     const [videoEnabled, setVideoEnabled] = useState(false)
     const [audioEnabled, setAudioEnabled] = useState(false)
     // disable connect button unless validated
@@ -147,9 +149,12 @@ export const RoomCheck = () => {
                 const [k, v] = param;
                 localStorage.setItem(k, v);
             }
-        navigate({
-            pathname: `/${roomname}/start`,
-        })
+        // navigate({
+        //     pathname: `/${roomname}/start`,
+        // })
+
+        props.check()
+
     }
 
     let videoElement: ReactElement;

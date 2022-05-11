@@ -34,7 +34,7 @@ export const Home = () => {
     }, [user])
     return (
         <>
-            <h1 className="center title">Welcome to Hamro Conference!!!</h1>
+            <h1 className="center title">Welcome to Hamro Chautari!!!</h1>
             <div className="generate">
                 {
                     user !== '' ?

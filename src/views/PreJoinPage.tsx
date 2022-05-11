@@ -127,13 +127,13 @@ export const PreJoinPage = () => {
         <div className="prejoin">
             <main>
                 <Link to="/">
-                    <h2>Hamro Conference</h2>
+                    <h2>Hamro Chautari</h2>
                 </Link>
                 <hr />
                 <div className="entrySection">
                     <div>
                         <div className="label">
-                            Conference URL
+                            Chautari URL
                         </div>
                         <div>
                             <input type="text" name="url" value={url} onChange={e => setUrl(e.target.value)} />

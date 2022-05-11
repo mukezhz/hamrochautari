@@ -33,7 +33,7 @@ export const logout = async () => {
 
 export const getUser = () => {
     try {
-        const tokenText = window.atob(localStorage.getItem('user') || '')
+        const tokenText = localStorage.getItem('user') || ''
         if (tokenText === '') {
             return null
         }
@@ -71,6 +71,6 @@ export const authenticate = async (token: string) => {
     const { access_token } = await user
     const { user_profile } = await user
     localStorage.setItem('access_token', access_token || '')
-    localStorage.setItem('user', window.btoa(JSON.stringify(user_profile)) || '')
+    localStorage.setItem('user', JSON.stringify(user_profile) || '')
     return await user_profile
 }

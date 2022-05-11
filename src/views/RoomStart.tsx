@@ -33,7 +33,7 @@ export const RoomStart = () => {
 
     useEffect(() => {
         return () => {
-            if (!location.pathname.includes('start')) {
+            if (location.pathname.length < 4) {
                 onLeave()
             }
         }
@@ -113,7 +113,7 @@ export const RoomStart = () => {
                 <div className="roomContainer">
                     <div className="topBar">
                         <a href="/">
-                            <h2>Hamro Conference</h2>
+                            <h2>Hamro Chautari</h2>
                         </a>
                         <div className="right">
                             <div>
