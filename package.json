@@ -15,6 +15,7 @@
     "react-router-dom": "^6.3.0",
     "react-simple-chat": "^1.1.4",
     "react-tiny-popover": "^7.0.1",
+    "runtime-env-cra": "^0.2.4",
     "unique-names-generator": "^4.7.1",
     "web-vitals": "^2.1.4"
   },
