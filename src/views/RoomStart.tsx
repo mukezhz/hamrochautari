@@ -104,9 +104,8 @@ export const RoomStart = () => {
     const onDataReceived = async (payload: Uint8Array, participant: RemoteParticipant | undefined, kind: DataPacket_Kind = 0) => {
         const string = new TextDecoder().decode(payload);
         const message: Message = JSON.parse(string)
-        dispatch(
-            addMessage({ ...message })
-        )
+        message.text = `${participant?.identity}: ${message.text}`
+        dispatch(addMessage({ ...message }))
     }
     return (
         <>
@@ -176,9 +175,14 @@ export const RoomStart = () => {
                                 minimized={true}
                                 titleColor='black'
                                 title={room.localParticipant.identity}
-                                user={{ id: room.localParticipant.sid, name: room.localParticipant.identity }}
+                                user={{
+                                    id: room.localParticipant.sid,
+                                    name: room.localParticipant.identity,
+                                    avatar: `https://ui-avatars.com/api/?name=${room.localParticipant.identity}`
+                                }}
                                 messages={messages}
                                 onSend={message => handleSend(message)}
+                                leftBubbleStyle={{ backgroundColor: 'red' }}
                             />
                             : ''
                     }
