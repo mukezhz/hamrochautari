@@ -11,8 +11,8 @@ import { getUser } from "../utils/auth";
 export const RoomCheck = () => {
     const { roomname = '' } = useParams();
     // state to pass onto room
-    const serverUrl = process.env.REACT_APP_URL || 'http://localhost:8000'
-    const wssUrl = process.env.REACT_APP_WSS || 'ws://localhost:7880'
+    const serverUrl = window.__RUNTIME_CONFIG__.REACT_APP_URL || 'http://localhost:8000'
+    const wssUrl = window.__RUNTIME_CONFIG__.REACT_APP_WSS || 'ws://localhost:7880'
     const [url, setUrl] = useState(serverUrl)
     // const url = 'http://localhost:8000'
     const user = getUser()

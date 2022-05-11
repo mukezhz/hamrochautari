@@ -17,7 +17,7 @@ const generateRoom = () => {
 }
 
 export const Home = () => {
-    const hosturl = process.env.REACT_APP_HOST_URL || "http://localhost:3000"
+    const hosturl = window.__RUNTIME_CONFIG__.REACT_APP_HOST_URL || "http://localhost:3000"
     const [room, setRoom] = useState(localStorage.getItem('room') || '')
     const [user, setUser] = useState('')
 

@@ -53,9 +53,9 @@ export const check = () => {
 }
 
 export const authenticate = async (token: string) => {
-    const url = process.env.REACT_APP_LOGIN_URL || ''
-    const appID = process.env.REACT_APP_APP_ID || ''
-    const webAPI = process.env.REACT_APP_WEB_API || ''
+    const url = window.__RUNTIME_CONFIG__.REACT_APP_LOGIN_URL || ''
+    const appID = window.__RUNTIME_CONFIG__.REACT_APP_APP_ID || ''
+    const webAPI = window.__RUNTIME_CONFIG__.REACT_APP_WEB_API || ''
     const response = await fetch(url, {
         headers: {
             "Grpc-Metadata-app-id": appID,
