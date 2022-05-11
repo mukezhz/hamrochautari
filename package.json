@@ -62,7 +62,7 @@
     "webpack-dev-server": "4.8.1"
   },
   "scripts": {
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
+    "start": "NODE_ENV=development runtime-env-cra --config-name=./public/runtime-env.js && GENERATE_SOURCEMAP=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
