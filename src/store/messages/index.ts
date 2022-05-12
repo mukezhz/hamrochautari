@@ -1,19 +1,18 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { Message } from "react-simple-chat";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface MessageInterface {
-    messages: Message[];
+interface MessageState {
+    messages: string[];
 }
 
-export const initialState: MessageInterface = {
-    messages: [] as Message[]
+export const initialState: MessageState = {
+    messages: [] as string[]
 };
 
 const messagesSlice = createSlice({
     name: 'messages',
     initialState,
     reducers: {
-        addMessage: (state, action) => {
+        addMessage: (state: MessageState, action: PayloadAction<string>) => {
             state.messages = [...state.messages, action.payload]
         }
     },

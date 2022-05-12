@@ -1,6 +1,7 @@
-import 'react-simple-chat/src/components/index.css';
+import 'react-chat-widget/lib/styles.css';
+import '../chatwidget.css'
 import '../index.css'
-import Chat, { Message } from 'react-simple-chat';
+import { Widget, addResponseMessage } from 'react-chat-widget';
 import { faSquare, faThLarge, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Room, RoomEvent, VideoPresets, DataPacket_Kind, RemoteParticipant } from 'livekit-client'
@@ -8,14 +9,13 @@ import { DisplayContext, DisplayOptions, LiveKitRoom } from 'livekit-react'
 import { useEffect, useState } from "react"
 import { useDispatch } from "react-redux";
 import { addMessage } from "../store/messages";
-import { useAppSelector } from "../hooks";
 import "react-aspect-ratio/aspect-ratio.css"
 import { useNavigate, useLocation } from 'react-router-dom'
 export const RoomStart = () => {
     const dispatch = useDispatch()
-    const messages = useAppSelector(state => state.messages.messages)
     const [numParticipants, setNumParticipants] = useState(0)
     const [room, setRoom] = useState<Room>()
+    const [client, setClient] = useState('')
     const [displayOptions, setDisplayOptions] = useState<DisplayOptions>({
         stageLayout: 'grid',
         showStats: false,
@@ -92,21 +92,23 @@ export const RoomStart = () => {
         return localStorage.getItem(key) === '1' || localStorage.getItem(key) === 'true';
     }
 
-    function handleSend(message: Message) {
+    function handleSend(message: string) {
         dispatch(
-            addMessage({ ...message })
+            addMessage(message)
         )
         if (!room) return
-        const encode = new TextEncoder().encode(JSON.stringify(message))
+        const encode = new TextEncoder().encode(message)
         room.localParticipant.publishData(encode, 0)
     }
 
     const onDataReceived = async (payload: Uint8Array, participant: RemoteParticipant | undefined, kind: DataPacket_Kind = 0) => {
-        const string = new TextDecoder().decode(payload);
-        const message: Message = JSON.parse(string)
-        message.text = `${participant?.identity}: ${message.text}`
-        dispatch(addMessage({ ...message }))
+        setClient(participant?.identity || '')
+        let message = new TextDecoder().decode(payload);
+        message = `${participant?.identity}: ${message}`
+        dispatch(addMessage(message))
+        addResponseMessage(message, participant?.sid ?? 'hello')
     }
+
     return (
         <>
             <DisplayContext.Provider value={displayOptions}>
@@ -170,19 +172,20 @@ export const RoomStart = () => {
                     </div>
                     {
                         room ?
-                            <Chat
-                                containerStyle={{ bottom: 0, maxheight: "100vh" }}
-                                minimized={true}
-                                titleColor='black'
+                            <Widget
+                                handleNewUserMessage={handleSend}
+                                emojis={true}
+                                profileClientAvatar={`https://ui-avatars.com/api/?name=${room.localParticipant.identity}`}
+                                titleAvatar={`https://ui-avatars.com/api/?name=${room.localParticipant.identity}`}
+                                profileAvatar={`https://ui-avatars.com/api/?name=${client}`}
                                 title={room.localParticipant.identity}
-                                user={{
-                                    id: room.localParticipant.sid,
-                                    name: room.localParticipant.identity,
-                                    avatar: `https://ui-avatars.com/api/?name=${room.localParticipant.identity}`
-                                }}
-                                messages={messages}
-                                onSend={message => handleSend(message)}
-                                leftBubbleStyle={{ backgroundColor: 'red' }}
+                                subtitle={"Welcome to Hamro Chautari"}
+                                autofocus={false}
+                                handleSubmit={() => { return false }}
+                                showBadge={true}
+                                senderPlaceHolder="Enter your message..."
+                                handleToggle={() => console.log("toogleing")}
+                                chatId={room.localParticipant.identity}
                             />
                             : ''
                     }

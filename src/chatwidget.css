@@ -1,0 +1,47 @@
+.rcw-conversation-container>.rcw-header {
+    background-color: red;
+}
+
+.rcw-message>.rcw-response {
+    background-color: black;
+    color: white;
+}
+
+.rcw-messages-container .rcw-message-text {
+    color: black;
+}
+
+.rcw-new-message .rcw-input[contenteditable=true] {
+    /* box-shadow: inset 0px 1px 4px #666; */
+    color: black;
+    /* height: 2rem; */
+}
+
+.rcw-launcher {
+    box-shadow: 0 0;
+    background-color: red;
+}
+
+.rcw-header .rcw-close-button {
+    background-color: red;
+}
+
+.rcw-sender {
+    align-items: center;
+}
+
+.rcw-new-message {
+    max-width: 370px;
+}
+
+.rcw-message>.rcw-response {
+    background-color: rgba(250, 250, 250);
+    color: black;
+}
+
+@media screen and (max-width: 890px) {
+    .rcw-conversation-container {
+        max-width: 100%;
+        min-width: none;
+    }
+}
