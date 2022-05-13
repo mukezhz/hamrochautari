@@ -1,7 +1,7 @@
 import 'react-chat-widget/lib/styles.css';
 import '../chatwidget.css'
 import '../index.css'
-import { Widget, addResponseMessage } from 'react-chat-widget';
+import { Widget, addResponseMessage, renderCustomComponent } from 'react-chat-widget';
 import { faSquare, faThLarge, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Room, RoomEvent, VideoPresets, DataPacket_Kind, RemoteParticipant } from 'livekit-client'
@@ -163,7 +163,7 @@ export const RoomStart = () => {
                                 adaptiveStream: isSet('adaptiveStream'),
                                 dynacast: isSet('dynacast'),
                                 videoCaptureDefaults: {
-                                    resolution: VideoPresets.h720.resolution,
+                                    resolution: VideoPresets.h1080.resolution,
                                 },
                                 logLevel: 'error',
                             }}
@@ -175,7 +175,7 @@ export const RoomStart = () => {
                             <Widget
                                 handleNewUserMessage={handleSend}
                                 emojis={true}
-                                profileClientAvatar={`https://ui-avatars.com/api/?name=${room.localParticipant.identity}`}
+                                // profileClientAvatar={`https://ui-avatars.com/api/?name=${room.localParticipant.identity}`}
                                 titleAvatar={`https://ui-avatars.com/api/?name=${room.localParticipant.identity}`}
                                 profileAvatar={`https://ui-avatars.com/api/?name=${client}`}
                                 title={room.localParticipant.identity}
@@ -186,6 +186,8 @@ export const RoomStart = () => {
                                 senderPlaceHolder="Enter your message..."
                                 handleToggle={() => console.log("toogleing")}
                                 chatId={room.localParticipant.identity}
+                                renderCustomComponent={<h1>Hello</h1>}
+                                showCloseButton={true}
                             />
                             : ''
                     }

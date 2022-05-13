@@ -175,10 +175,10 @@ export const RoomCheck = (props: RoomCheckProp) => {
                 (<div className="prejoin">
                     <main>
                         <Link to="/">
-                            <h2>Hamro Conference</h2>
+                            <h1 className="center">Hamro Conference</h1>
                         </Link>
                         <hr />
-
+                        <h3 className="center">Testing your camera/mic</h3>
                         <div className="videoSection">
                             <AspectRatio ratio={16 / 9}>
                                 {videoElement}

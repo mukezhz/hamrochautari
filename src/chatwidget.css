@@ -39,9 +39,12 @@
     color: black;
 }
 
-@media screen and (max-width: 890px) {
+@media screen and (max-width: 800px) {
     .rcw-conversation-container {
         max-width: 100%;
-        min-width: none;
+        min-width: 100px;
+    }
+    .rcw-new-message {
+        max-width: 95%;
     }
 }
