@@ -7,6 +7,8 @@ import { ReactElement, useEffect, useState } from "react"
 import { AspectRatio } from 'react-aspect-ratio'
 import { fetchToken } from "../utils";
 import { getUser } from "../utils/auth";
+import { CustomName } from "./CustomName";
+import { Redirect } from "../components/Redirect";
 interface RoomCheckProp {
     check: Function;
 }
@@ -16,10 +18,8 @@ export const RoomCheck = (props: RoomCheckProp) => {
     const serverUrl = window.__RUNTIME_CONFIG__.REACT_APP_URL || 'http://localhost:8000'
     const wssUrl = window.__RUNTIME_CONFIG__.REACT_APP_WSS || 'ws://localhost:7880'
     const [url, setUrl] = useState(serverUrl)
-    // const url = 'http://localhost:8000'
     const user = getUser()
-    const name = user?.displayName
-    // await fetchToken(url, roomname, name)
+    const name = user?.displayName || localStorage.getItem('username')
     const [token, setToken] = useState<string>('')
     const simulcast = true
     const dynacast = useState(true)
@@ -32,10 +32,12 @@ export const RoomCheck = (props: RoomCheckProp) => {
     const [audioDevice, setAudioDevice] = useState<MediaDeviceInfo>();
     const [videoDevice, setVideoDevice] = useState<MediaDeviceInfo>();
     const [count, setCount] = useState(5)
+    const [customName, setCustomName] = useState(false)
     const navigate = useNavigate()
 
+
     useEffect(() => {
-        if (!name || !roomname || !url) {
+        if (!roomname || !url) {
             count > 0 && setTimeout(() => {
                 setCount(count - 1)
             }, 1000)
@@ -43,17 +45,23 @@ export const RoomCheck = (props: RoomCheckProp) => {
                 pathname: '/'
             })
         }
-        (async () => {
-            try {
-                const response = await fetchToken(url, roomname, name)
-                const { access_token = '' } = response;
-                setToken(access_token)
-                setUrl(wssUrl)
-            } catch (e) {
-                console.log(e);
-            }
-        })()
-    }, [count])
+        name ?
+            (async () => {
+                try {
+                    const response = await fetchToken(url, roomname, name)
+                    const { access_token = '' } = response;
+                    setToken(access_token)
+                    setUrl(wssUrl)
+                } catch (e) {
+                    console.error("Fetching...");
+                }
+            })()
+            :
+            setCustomName(true)
+        count > 0 && setTimeout(() => {
+            setCount(count - 1)
+        }, 1000)
+    }, [count, name, roomname, url, navigate, wssUrl])
 
     useEffect(() => {
         if (token && url) {
@@ -80,18 +88,19 @@ export const RoomCheck = (props: RoomCheckProp) => {
     useEffect(() => {
         // enable video by default
         let video: LocalVideoTrack;
-        createLocalVideoTrack({
-            deviceId: videoDevice?.deviceId,
-        }).then((track) => {
-            video = track;
-            // track?.stop()
-            setVideoEnabled(true)
-            setVideoTrack(track)
-        })
+        if (name)
+            createLocalVideoTrack({
+                deviceId: videoDevice?.deviceId,
+            }).then((track) => {
+                video = track;
+                // track?.stop()
+                setVideoEnabled(true)
+                setVideoTrack(track)
+            })
         return () => {
             video?.stop()
         }
-    }, [videoDevice])
+    }, [videoDevice, name])
 
     const toggleAudio = () => {
         if (audioEnabled) {
@@ -149,12 +158,7 @@ export const RoomCheck = (props: RoomCheckProp) => {
                 const [k, v] = param;
                 localStorage.setItem(k, v);
             }
-        // navigate({
-        //     pathname: `/${roomname}/start`,
-        // })
-
         props.check()
-
     }
 
     let videoElement: ReactElement;
@@ -166,49 +170,48 @@ export const RoomCheck = (props: RoomCheckProp) => {
 
     return (
         <>
-            {!name ? (<div className="App-header">
-                <h1>Unabe to fetch user info 🙁🙁🙁 </h1>
-                <p> Redirecting to home in: {count} seconds </p>
-            </div>
-            ) :
-
-                (<div className="prejoin">
-                    <main>
-                        <Link to="/">
-                            <h1 className="center">Hamro Conference</h1>
-                        </Link>
-                        <hr />
-                        <h3 className="center">Testing your camera/mic</h3>
-                        <div className="videoSection">
-                            <AspectRatio ratio={16 / 9}>
-                                {videoElement}
-                            </AspectRatio>
-                        </div>
-
-                        <div className="controlSection">
-                            <div>
-                                <AudioSelectButton
-                                    isMuted={!audioEnabled}
-                                    onClick={toggleAudio}
-                                    onSourceSelected={setAudioDevice}
-                                />
-                                <VideoSelectButton
-                                    isEnabled={videoTrack !== undefined}
-                                    onClick={toggleVideo}
-                                    onSourceSelected={selectVideoDevice}
-                                />
+            {
+                !name && !customName ?
+                    <Redirect count={count} />
+                    :
+                    <div className="prejoin">
+                        <main>
+                            <Link to="/">
+                                <h1 className="center">Hamro Conference</h1>
+                            </Link>
+                            <hr />
+                            <h3 className="center">Testing your camera/mic</h3>
+                            <div className="videoSection">
+                                <AspectRatio ratio={16 / 9}>
+                                    {videoElement}
+                                </AspectRatio>
                             </div>
-                            <div className="right">
-                                <ControlButton
-                                    label="Connect"
-                                    disabled={connectDisabled}
-                                    //@ts-ignore
-                                    icon={faBolt}
-                                    onClick={connectToRoom} />
+
+                            <div className="controlSection">
+                                <div>
+                                    <AudioSelectButton
+                                        isMuted={!audioEnabled}
+                                        onClick={toggleAudio}
+                                        onSourceSelected={setAudioDevice}
+                                    />
+                                    <VideoSelectButton
+                                        isEnabled={videoTrack !== undefined}
+                                        onClick={toggleVideo}
+                                        onSourceSelected={selectVideoDevice}
+                                    />
+                                </div>
+                                <div className="right">
+                                    <ControlButton
+                                        label={!token ? "Connecting" : "Join Room"}
+                                        disabled={connectDisabled}
+                                        //@ts-ignore
+                                        icon={faBolt}
+                                        onClick={connectToRoom} />
+                                </div>
                             </div>
-                        </div>
-                    </main>
-                </div>)
+                        </main>
+                        {customName ? <CustomName customToggle={setCustomName} /> : ''}
+                    </div>
             }
         </>
     )
