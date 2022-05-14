@@ -6,6 +6,7 @@ import { Home } from './views/Home';
 import { Login } from './views/Login';
 import { PrivateRoute } from './views/PrivateRoute';
 import { Chautari } from './views/Chautari';
+import { CustomName } from "./views/CustomName";
 
 const App = () => {
   return (
@@ -15,8 +16,9 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/room" element={<PrivateRoute component={RoomPage} />} />
           <Route path="/test" element={<PrivateRoute component={PreJoinPage} />} />
-          <Route path="/:roomname" element={<PrivateRoute component={Chautari} />} />
+          <Route path="/:roomname" element={<Chautari />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/name" element={<CustomName />} />
         </Routes>
       </Router>
     </div >

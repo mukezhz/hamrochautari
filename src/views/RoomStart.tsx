@@ -1,7 +1,7 @@
 import 'react-chat-widget/lib/styles.css';
 import '../chatwidget.css'
 import '../index.css'
-import { Widget, addResponseMessage, renderCustomComponent } from 'react-chat-widget';
+import { Widget, addResponseMessage } from 'react-chat-widget';
 import { faSquare, faThLarge, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Room, RoomEvent, VideoPresets, DataPacket_Kind, RemoteParticipant } from 'livekit-client'
@@ -26,6 +26,14 @@ export const RoomStart = () => {
     const token = localStorage.getItem("token");
     const recorder = localStorage.getItem("recorder");
     const onLeave = () => {
+        localStorage.removeItem('adaptiveStream')
+        localStorage.removeItem('audioEnabled')
+        localStorage.removeItem('dynacast')
+        localStorage.removeItem('loglevel:livekit')
+        localStorage.removeItem('simulcast')
+        localStorage.removeItem('videoEnabled')
+        localStorage.removeItem('url')
+        localStorage.removeItem('room')
         navigate({
             pathname: '/',
         })
@@ -37,7 +45,8 @@ export const RoomStart = () => {
                 onLeave()
             }
         }
-    }, [])
+        // eslint-disable-next-line
+    }, [location.pathname.length])
 
     if (!url || !token) {
         return (

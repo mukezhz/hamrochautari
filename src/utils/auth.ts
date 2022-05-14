@@ -29,6 +29,10 @@ export const logout = async () => {
     await signOut(auth)
     localStorage.removeItem('user')
     localStorage.removeItem("room")
+    localStorage.removeItem("token")
+    localStorage.removeItem("access_token")
+    localStorage.removeItem("loglevel:livekit")
+    localStorage.removeItem("username")
 }
 
 export const getUser = () => {
@@ -68,9 +72,12 @@ export const authenticate = async (token: string) => {
         method: 'POST'
     })
     const user = await response.json()
+    console.log(user)
     const { access_token } = await user
+    // const { user_profile: { photo_url } } = await user
+    // localStorage.setItem('photo_url', photo_url)
     const { user_profile } = await user
-    localStorage.setItem('access_token', access_token || '')
-    localStorage.setItem('user', JSON.stringify(user_profile) || '')
+    localStorage.setItem('access_token', access_token)
+    localStorage.setItem('user', JSON.stringify(user_profile))
     return await user_profile
 }

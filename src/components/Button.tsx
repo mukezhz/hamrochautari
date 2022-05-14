@@ -1,8 +1,8 @@
 import '../index.css'
 interface ButtonProp {
-    css: string | '';
-    click: React.MouseEventHandler<Element>;
-    children: React.ReactChild | null;
+    css?: string | '';
+    click?: React.MouseEventHandler<Element>;
+    children?: React.ReactChild | null;
 }
 export const Button = (props: ButtonProp) => {
     return (

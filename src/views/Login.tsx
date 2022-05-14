@@ -15,7 +15,7 @@ export const Login = () => {
             setUser(result?.displayName || '')
             setLoad(true)
         })()
-    }, [user])
+    }, [user, navigate])
     const handleLoginWithGoogle = async () => {
         await signInWithGoogle()
     }

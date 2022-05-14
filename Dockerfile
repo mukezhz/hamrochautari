@@ -5,6 +5,7 @@ ENV APP_HOME=${APP_HOME}
 WORKDIR ${APP_HOME}
 COPY package.json .
 COPY package-lock.json .
+RUN npm i -g npm
 RUN npm ci
 COPY ./tsconfig.json .
 COPY ./public public/
